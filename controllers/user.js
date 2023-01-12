@@ -126,12 +126,8 @@ exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
     const user = await User.findOne({ email });
-    if(user.block){
-      return res.status(400).json({
-        message:
-          "You are blocked by admin",
-      });
-    }
+    console.log(user);
+   
     if (!user) {
       return res.status(400).json({
         message:
@@ -139,6 +135,13 @@ exports.login = async (req, res) => {
       });
     }
     const check = await bcrypt.compare(password, user.password);
+    if(user.block){
+      return res.status(400).json({
+        message:
+          "You are blocked by admin",
+      });
+    }
+    
     if (!check) {
       return res.status(400).json({
         message: "Invalid credentials.Please try again.",
