@@ -5,6 +5,9 @@ const {
   comment,
   savePost,
   deletePost,
+  getSavedPosts,
+  reportPost,
+  getReportedPosts
 } = require("../controllers/post");
 const { authUser } = require("../middlwares/auth");
 
@@ -15,5 +18,8 @@ router.get("/getAllPosts", authUser, getAllPosts);
 router.put("/comment", authUser, comment);
 router.put("/savePost/:id", authUser, savePost);
 router.delete("/deletePost/:id", authUser, deletePost);
+router.get("/savedPosts",authUser, getSavedPosts);
+router.put("/reportPost/:id", authUser,reportPost );
+router.get("/getReportPosts",getReportedPosts );
 
 module.exports = router;

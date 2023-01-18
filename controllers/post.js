@@ -15,14 +15,14 @@ exports.getAllPosts = async (req, res) => {
     const followingTemp = await User.findById(req.user.id).select("following");
     const following = followingTemp.following;
     const promises = following.map((user) => {
-      return Post.find({ user: user, block:false })
+      return Post.find({ user: user, block: false })
         .populate("user", "first_name last_name picture username cover")
         .populate("comments.commentBy", "first_name last_name picture username")
         .sort({ createdAt: -1 })
         .limit(10);
     });
     const followingPosts = await (await Promise.all(promises)).flat();
-    const userPosts = await Post.find({ user: req.user.id, block:false })
+    const userPosts = await Post.find({ user: req.user.id, block: false })
       .populate("user", "first_name last_name picture username cover")
       .populate("comments.commentBy", "first_name last_name picture username")
       .sort({ createdAt: -1 })
@@ -92,10 +92,79 @@ exports.savePost = async (req, res) => {
   }
 };
 
+exports.getSavedPosts = async (req, res) => {
+  try {
+    const id = req.user.id;
+    const savedTemp = await User.findById(id).select("savedPosts");
+    const savedPosts = savedTemp.savedPosts;
+    const promises = savedPosts.map((user) => {
+      return Post.find({ _id: user.post }).populate(
+        "user",
+        "first_name last_name picture username cover"
+      );
+    });
+
+    const allSavedPosts = await (await Promise.all(promises)).flat();
+
+    res.status(200).json(allSavedPosts);
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
+
 exports.deletePost = async (req, res) => {
   try {
     await Post.findByIdAndRemove(req.params.id);
     res.json({ status: "ok" });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+exports.reportPost = async (req, res) => {
+  try {
+    const postId = req.params.id;
+    console.log("post=>", postId);
+    const post = await Post.findById(postId);
+    const check = post.reportPosts.find(
+      (post) => post.id.toString() == req.user.id
+    );
+
+    if (check) {
+      await Post.findByIdAndUpdate(postId, {
+        $pull: {
+          reportPosts: {
+            _id: check._id,
+          },
+        },
+      });
+    } else {
+      console.log("else");
+      await Post.findByIdAndUpdate(postId, {
+        $push: {
+          reportPosts: {
+            id: req.user.id,
+            savedAt: new Date(),
+          },
+        },
+      });
+    }
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+exports.getReportedPosts = async (req, res) => {
+  try {
+    const posts = await Post.find({ "reportPosts.0": { "$exists": true }}).populate(
+      "reportPosts.id",
+      "first_name last_name picture username cover"
+    ).populate("user","first_name last_name picture username cover email").populate("comments.commentBy", "picture first_name last_name username");
+
+
+
+    res.status(200).json(posts);
+
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }

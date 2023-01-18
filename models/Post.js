@@ -45,6 +45,19 @@ const postSchema = new mongoose.Schema(
         },
       },
     ],
+
+    reportPosts: [
+      {
+        id: {
+          type: ObjectId,
+          ref: "User",
+        },
+        savedAt: {
+          type: Date,
+          required: true,
+        },
+      },
+    ],
   },
   {
     timestamps: true,

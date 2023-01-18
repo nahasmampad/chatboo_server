@@ -26,7 +26,7 @@ const {
   removeFromSearch,
   getFriendsPageInfos,
   getUser,
-  getFriends
+  getFriends,
 } = require("../controllers/user");
 const { authUser } = require("../middlwares/auth");
 
@@ -58,5 +58,6 @@ router.put("/removeFromSearch", authUser, removeFromSearch);
 router.get("/getFriendsPageInfos", authUser, getFriendsPageInfos);
 router.get("/getUser/:userId",authUser, getUser);
 router.get("/getFriends/:userId",authUser, getFriends);
+
 
 module.exports = router;

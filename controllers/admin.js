@@ -3,10 +3,16 @@ const Post = require("../models/Post");
 
 exports.getallpost = async (req, res) => {
   try {
-    const posts = await Post.find().populate(
-      "user",
-      "first_name last_name picture username cover email"
-    ).sort({createdAt:-1});
+    // const posts = await Post.find().populate(
+    //   "user",
+    //   "first_name last_name picture username cover email"
+    // ).sort({createdAt:-1});
+
+    const posts = await Post.find()
+      .populate("reportPosts.id", "first_name last_name picture username cover")
+      .populate("user", "first_name last_name picture username cover email")
+      .populate("comments.commentBy", "picture first_name last_name username").sort({createdAt:-1});
+
     return res.status(200).json(posts);
   } catch (error) {
     return res.status(500).json({ message: error.message });
@@ -15,7 +21,9 @@ exports.getallpost = async (req, res) => {
 
 exports.getallusers = async (req, res) => {
   try {
-    const users = await User.find({ admin: false }).select("-password").sort({createdAt:-1});
+    const users = await User.find({ admin: false })
+      .select("-password")
+      .sort({ createdAt: -1 });
     return res.status(200).json(users);
   } catch (error) {
     return res.status(500).json({ message: error.message });
